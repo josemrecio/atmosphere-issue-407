@@ -42,7 +42,7 @@ $
 cd server
 cp -pr default test
 
-# download from this git repository and build the war project (mvn clean install)
+# download from this git repository, select atmosphere-runtime version in pom.xml and build the war project (mvn clean install)
 # deploy
 cp /data/atmolp/atmolp.war /tmp/jboss-atmo/jboss-5.1.0.GA/server/test/deploy
 
