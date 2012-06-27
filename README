@@ -1,0 +1,55 @@
+Small testbench for behaviour described in Atmosphere issue #407
+
+https://github.com/Atmosphere/atmosphere/issues/407
+
+It comprises a war project (atmolp) and a http client (asyncLP).
+
+Uncomment in Basic.java (line 34):
+
+                        //event.getResource().getRequest().getSession().invalidate();
+
+and you can see (e.g. heap dumps) the number of catalina.StandardSession objects grows +1 every time a new request is processed, and it never expires.
+
+Step-by-step setup:
+
+# uncompress jboss-5.1 in /tmp/jboss-atmo
+cd /tmp
+mkdir jboss-atmo
+cd jboss-atmo
+unzip /data/software/jboss-5.1.0.GA-jdk6.zip
+cd jboss-5.1.0.GA/
+tar xvfz /data/software/jboss-native-2.0.9-linux2-x64-ssl.tar.gz
+
+# modify run.sh so APR is recognized
+cp bin/run.sh bin/run.sh.original
+vi bin/run.sh
+$ diff -u bin/run.sh.original bin/run.sh
+--- bin/run.sh.original    2012-06-04 09:13:01.849842377 +0200
++++ bin/run.sh    2012-06-04 09:12:42.117842612 +0200
+@@ -205,7 +205,8 @@
+   ;;
+ esac
+
+-JBOSS_NATIVE_DIR="$JBOSS_HOME/bin/META-INF/lib/$JBOSS_NATIVE_SYS/$JBOSS_NATIVE_CPU"
++#JBOSS_NATIVE_DIR="$JBOSS_HOME/bin/META-INF/lib/$JBOSS_NATIVE_SYS/$JBOSS_NATIVE_CPU"
++JBOSS_NATIVE_DIR="$JBOSS_HOME/bin/native"
+ if [ -d "$JBOSS_NATIVE_DIR" ]; then
+     if $cygwin ; then
+         export PATH="$JBOSS_NATIVE_DIR:$PATH"
+$
+
+# create configuration based on basic
+cd server
+cp -pr default test
+
+# download from this git repository and build the war project (mvn clean install)
+# deploy
+cp /data/atmolp/atmolp.war /tmp/jboss-atmo/jboss-5.1.0.GA/server/test/deploy
+
+# start AS
+../../bin/run.sh -c test -b 127.0.0.1
+
+# download from this git repository and build the client (mvn clean install)
+# run client
+java -jar target/asyncLP-0.0.1-SNAPSHOT-distribuible.jar
+
